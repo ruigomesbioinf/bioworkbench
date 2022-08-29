@@ -77,7 +77,7 @@ class BoyerMoore:
             self.f[i] = j
         j = self.f[0]
         for i in range(len(self.pattern)):
-            if self.s[i] == 0: self.f[i] = j
+            if self.s[i] == 0: self.s[i] = j
             if i == j: j = self.f[j]
 
     def search_pattern(self, sequence: str) -> List[int]:
@@ -93,11 +93,3 @@ class BoyerMoore:
                 c = sequence[j+i]
                 i += max(self.s[j+1], j - self.occ[c])
         return res
-
-
-
-def test():
-    bm = BoyerMoore("ACTG", "ACCA")
-    print(bm.search_pattern("ATAGAACCAATGAACCATGATGAACCATGGATACCCAACCACC"))
-
-test()
