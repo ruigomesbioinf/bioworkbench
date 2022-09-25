@@ -84,6 +84,82 @@ def find_prosite(seq: str, pattern: str):
         return mo.span()[0]
     else:
         return -1
+    
+def iub_to_re(iub: str):
+    """Function that converts IUPAC extended alphabet patterns to regular expressions for string search
+
+    Args:
+        iub (str): IUPAC extended alphabet pattern
+    """
+    dic = {
+        "A": "A",
+        "C": "C",
+        "G": "G",
+        "T": "T",
+        "U": "U",
+        "K": "[GT]",
+        "M": "[AC]",
+        "R": "[AG]",
+        "S": "[CG]",
+        "W": "[AT]",
+        "Y": "[CT]",
+        "B": "[CGT]",
+        "D": "[AGT]",
+        "H": "[ACT]",
+        "V": "[ACG]",
+        "N": "[ACGT]"
+    }
+    
+    site = iub.replace("^", "")
+    regexp = ""
+    
+    for char in site:
+        regexp += dic[char]
+        
+    return regexp
+
+def cut_positions(enzyme: str, sequence: str):
+    """Function that detects where a given enzyme will cut a given DNA sequence
+
+    Args:
+        enzyme (str): Restriction enzyme
+        sequence (str): Sequence where given enzyme will cut
+    """ 
+    cut_pos = enzyme.find("^")
+    regexp = iub_to_re(enzyme)
+    
+    matches = re.finditer(regexp, sequence)
+    locs = []
+    
+    for m in matches:
+        locs.append(m.start() + cut_pos)
+        
+    return locs
+
+def cut_subsequences(locs: List[int], sequence: str):
+    """Function that computes the resulting sub-sequences after restriction enzyme cuts (restriction map).
+
+    Args:
+        locs (List[int]): A list of locations of cutting positions
+        sequence (str): DNA sequence
+    """
+    result = []
+    positions = locs
+    positions.insert(0, 0)
+    positions.append(len(sequence))
+    for i in range(len(positions) - 1):
+        result.append(sequence[positions[i]:positions[i+1]])
+        
+    return result
+    
+
+def test():
+    pos = cut_positions("G^ATTC", "GTAGAAGATTCTGAGATCGATTC")
+    res = cut_subsequences(pos, "GTAGAAGATTCTGAGATCGATTC")
+    print(pos)
+    print(res)
+    
+test()
 
 
 class BoyerMoore:
