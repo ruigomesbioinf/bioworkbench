@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
+import re
 
 def search_first_occ(seq: str, pattern: str) -> int:
     """Return the position of the pattern or -1 if the pattern is not found.
@@ -41,6 +42,49 @@ def search_all_occurrences(seq: str, pattern: str) -> List[int]:
         if j == len(pattern): res.append(i)
 
     return res
+
+def find_pattern_re(seq: str, pat: str):
+    """Find pattern in string using regular expressions
+
+    Args:
+        seq (str): sequence
+        pat (str): pattern to search on sequence (as regular expression)
+    """
+    mo = re.search(pat, seq)
+    if mo != None:
+        return mo.span()[0]
+    else: return -1
+    
+def find_all_occurrences_re(seq: str, pat: str):
+    """Returns all ocurrences of pattern in sequence using regular expressions to do it.
+
+    Args:
+        seq (str): sequence 
+        pat (str): pattern to search on sequence (as regular expression)
+    """
+    mo = re.finditer(pat, seq)
+    res = []
+    for x in mo:
+        res.append(x.span()[0])
+    return res
+
+def find_prosite(seq: str, pattern: str):
+    """A function that turns a Prosite pattern into a regular expression for pattern searching
+
+    Args:
+        seq (str): Sequence where the search will happen
+        pattern (str): Prosite pattern
+    """
+    regexp = pattern.replace("-", "")
+    regexp = regexp.replace("x", ".")
+    regexp = regexp.replace("{", "(")
+    regexp = regexp.replace("}", ")")
+    mo = re.search(regexp, seq)
+    if mo != None:
+        return mo.span()[0]
+    else:
+        return -1
+
 
 class BoyerMoore:
     """Heuristic algorithm for pattern searching on strings. This algorithm is based on two
@@ -179,7 +223,7 @@ class Automata:
         q = 0
         res = []
         for i in range(len(seq)):
-            q = self.next_state(1, seq[i])
+            q = self.next_state(q, seq[i])
             if q == self.numstates-1:
                 res.append(i - self.numstates + 2)
                 
